@@ -17,7 +17,19 @@ The shell script to use requires the programs [“ImageMagick”](https://imagem
 
 ## Application
 
-Call `create_slideshow` in a directory that contains the desired image files. A video file is then created (format “mp4”), which consists of a combination of the text of the metadata “Caption/Abstract” (`IPTC:2:120`) and “DateTimeOriginal” (`EXIF`) as well as the graphical content.
+Call 
+
+```
+create_slideshow -c -d
+```
+
+in a directory that contains the desired image files. A video file is then created (format “mp4”), which consists of a combination of the text of the metadata “Caption/Abstract” (`IPTC:2:120`) and “DateTimeOriginal” (`EXIF`) as well as the graphical content. Command line switches:
+
+```
+-c     shows caption
+-d     shows date+time
+-h     help
+```
 
 ## Modifications
 

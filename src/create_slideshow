@@ -10,6 +10,33 @@ RESOLUTION='1920x1080'
 DELAY=10 # seconds
 # The usual time jump for the arrow keys, e.g. for 'vlc', is 10 seconds.
 
+show_cap=false
+show_date=false
+
+while getopts ":cdh" opt; do
+  case ${opt} in
+    c)
+      show_cap=true
+      ;;
+    d)
+      show_date=true
+      ;;
+    h)
+      echo
+      echo "Syntax: create_slideshow [-|c|d|h]"
+      echo "options:"
+      echo "c     shows caption"
+      echo "d     shows date+time"
+      echo "h     this help"
+      echo
+      ;;
+    ?)
+      echo "Invalid option: -${OPTARG}."
+      exit 1
+      ;;
+  esac
+done
+
 rm -f temp-????-?.png
 
 n=0
@@ -19,9 +46,15 @@ find . -maxdepth 1 -name "*" | sort | while read f ; do # works with spaces in n
     echo "${n}.: ${f}"
     desc_file=$(printf "temp-%04d-0.png" ${n})
     img_file=$(printf "temp-%04d-1.png" ${n})
-    cap_text=$(identify -format "%${CAPTION}" "${f}" 2> /dev/null)
-    date_text=$(identify -format "%${DATETIME}" "${f}" 2> /dev/null \
-      | rev | sed 's/:/-/g3' | rev) # replacing the first two ":" with "-"
+    cap_text=''
+    if [ "${show_cap}" = true ] ; then
+      cap_text=$(identify -format "%${CAPTION}" "${f}" 2> /dev/null)
+    fi
+    date_text=''
+    if [ "${show_date}" = true ] ; then
+      date_text=$(identify -format "%${DATETIME}" "${f}" 2> /dev/null \
+        | rev | sed 's/:/-/g3' | rev) # replacing the first two ":" with "-"
+    fi    
     text=$(echo -e "${cap_text}\n\n${date_text}" | \
       sed -z 's/^\s*//' | sed -z 's/\s*$//') # removing leading/trailing white spaces
     if [ -n "${text}" ]; then
