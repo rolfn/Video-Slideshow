@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Rolf Niepraschk, Version 2.0.5, 2023-11-21
+
+CAPTION='[IPTC:2:120]' # Caption/Abstract
+DATETIME='[EXIF:DateTimeOriginal]' 
+
+VIDEO_FILE='slideshow.mp4'
+RESOLUTION='1920x1080'
+DELAY=10 # seconds
+# The usual time jump for the arrow keys, e.g. for 'vlc', is 10 seconds.
+
+rm -f temp-????-?.png
+
+n=0
+find . -maxdepth 1 -name "*" | sort | while read f ; do # works with spaces in names
+  if file "$f" | grep -qE 'image|bitmap'; then # only image files
+    n=$(( ${n}+1 ))
+    echo "${n}.: ${f}"
+    desc_file=$(printf "temp-%04d-0.png" ${n})
+    img_file=$(printf "temp-%04d-1.png" ${n})
+    cap_text=$(identify -format "%${CAPTION}" "${f}" 2> /dev/null)
+    date_text=$(identify -format "%${DATETIME}" "${f}" 2> /dev/null \
+      | rev | sed 's/:/-/g3' | rev) # replacing the first two ":" with "-"
+    text=$(echo -e "${cap_text}\n\n${date_text}" | \
+      sed -z 's/^\s*//' | sed -z 's/\s*$//') # removing leading/trailing white spaces
+    if [ -n "${text}" ]; then
+      convert -fill white -background black \
+        -pointsize 20 -size 480x -gravity center caption:"${text}" \
+          -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${desc_file}"
+    fi
+    convert "${f}" -background black -gravity center \
+      -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${img_file}"    
+  fi
+done
+
+echo -e "\nCreate: ${VIDEO_FILE}"
+
+cat temp-????-?.png | \
+  ffmpeg -y -loglevel error -framerate "1/${DELAY}" -f image2pipe -i - -r 25 \
+    -c:v libx264 "${VIDEO_FILE}"
+
+rm -f temp-????-?.png
+
+echo "done."
+
+exit
+
