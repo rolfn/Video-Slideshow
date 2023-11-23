@@ -30,6 +30,7 @@ while getopts ":cdh" opt; do
       echo "d     shows date+time"
       echo "h     this help"
       echo
+      exit 1
       ;;
     ?)
       echo "Invalid option: -${OPTARG}."
