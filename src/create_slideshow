@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Rolf Niepraschk, Version 2.1.0, 2023-11-21
+# Rolf Niepraschk, Version 2.1.1, 2023-11-21
 
 CAPTION='[IPTC:2:120]' # Caption/Abstract
 DATETIME='[EXIF:DateTimeOriginal]' 
@@ -41,12 +41,12 @@ done
 rm -f temp-????-?.png
 
 n=0
-find . -maxdepth 1 -name "*" | sort | while read f ; do # works with spaces in names
-  if file "$f" | grep -qE 'image|bitmap'; then # only image files
+find . -maxdepth 1 -name "*" | sort | while read f ; do # Works with spaces in names.
+  if file "$f" | grep -qE 'image|bitmap'; then # Only image files.
     n=$(( ${n}+1 ))
     echo "${n}.: ${f}"
     desc_file=$(printf "temp-%04d-0.png" ${n})
-    img_file=$(printf "temp-%04d-1.png" ${n})
+    img_file=$(printf  "temp-%04d-1.png" ${n})
     cap_text=''
     if [ "${show_cap}" = true ] ; then
       cap_text=$(identify -format "%${CAPTION}" "${f}" 2> /dev/null)
@@ -54,10 +54,10 @@ find . -maxdepth 1 -name "*" | sort | while read f ; do # works with spaces in n
     date_text=''
     if [ "${show_date}" = true ] ; then
       date_text=$(identify -format "%${DATETIME}" "${f}" 2> /dev/null \
-        | rev | sed 's/:/-/g3' | rev) # replacing the first two ":" with "-"
+        | rev | sed 's/:/-/g3' | rev) # Replacing the first two ":" with "-".
     fi    
     text=$(echo -e "${cap_text}\n\n${date_text}" | \
-      sed -z 's/^\s*//' | sed -z 's/\s*$//') # removing leading/trailing white spaces
+      sed -z 's/^\s*//' | sed -z 's/\s*$//') # Removing leading/trailing white spaces.
     if [ -n "${text}" ]; then
       convert -fill white -background black \
         -pointsize 20 -size 480x -gravity center caption:"${text}" \
@@ -73,9 +73,10 @@ if [ -f 'temp-0001-1.png' ]; then
   cat temp-????-?.png | \
     ffmpeg -y -loglevel error \
       -f lavfi -i anullsrc -framerate "1/${DELAY}" -f image2pipe -i - \
-       -r ${FPS} -c:v libx264  -profile:v baseline -pix_fmt yuv420p -c:a aac \
-         -max_muxing_queue_size 4000 -shortest "${VIDEO_FILE}"
-  # video should have an audio channel (dummy) and an old h264 profile.
+        -r ${FPS} -c:v libx264 -profile:v baseline -pix_fmt yuv420p -c:a aac \
+          -max_muxing_queue_size 4000 -shortest "${VIDEO_FILE}"
+  # The video should have an audio dummy channel and an old h264 profile to
+  # display on older TVs.
 fi
 
 rm -f temp-????-?.png

@@ -1,6 +1,6 @@
 
-The file `slideshow.mp4` was created with the following call:
+The file `slideshow.mp4` was created inside this directory with the following call:
 
 ```
-create_slideshow -c -d
+create_slideshow -cd
 ```

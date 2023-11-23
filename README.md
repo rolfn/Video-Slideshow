@@ -1,21 +1,24 @@
-# Video-Slideshow
+# Video Slideshow
 
 Creation of a video file from metadata of image files and their graphical content.
 
 ## Requirement
 
-The shell script to use requires the programs [“ImageMagick”](https://imagemagick.org/) and [“FFmpeg”](https://ffmpeg.org/) to be installed.
+The shell script to use requires the programs “[ImageMagick](https://imagemagick.org/)” and “[FFmpeg](https://ffmpeg.org/)” to be installed.
 
 ## Installation
 
-* Download [create_slideshow](./src/create_slideshow).
-* Make sure the `create_slideshow` file is executable:
+* Download [create_slideshow](./src/create_slideshow)
+
+* Make sure the file `create_slideshow` is executable:
+
   ```
   chmod u+x create_slideshow
   ```
+  
 * Move `create_slideshow` to a location included in the `PATH` environment variable (e.g. `$HOME/bin`, `/usr/local/bin`, ...)
 
-## Application
+## Usage
 
 Call 
 
