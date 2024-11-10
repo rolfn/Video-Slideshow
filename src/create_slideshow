@@ -42,7 +42,7 @@ done
 rm -f temp-????-?.png
 
 n=0
-find . -maxdepth 1 -name "*" | sort | while read f ; do # Works with spaces in names.
+find . -maxdepth 2 -name "*" | sort | while read f ; do # Works with spaces in names.
   if file "$f" | grep -qE 'image|bitmap'; then # Only image files.
     n=$(( ${n}+1 ))
     echo "${n}.: ${f}"
