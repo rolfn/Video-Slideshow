@@ -1,12 +1,17 @@
 #!/bin/bash
 
-# Rolf Niepraschk, Version 2.1.1, 2023-11-21
+# Rolf Niepraschk, Version 2.2.0 2024-11-10
 
 CAPTION='[IPTC:2:120]' # Caption/Abstract
 DATETIME='[EXIF:DateTimeOriginal]' 
 
 VIDEO_FILE='slideshow.mp4'
 RESOLUTION='1920x1080'
+POINTSIZE=20
+TEXTWIDTH=480
+H_BORDER=10
+V_BORDER=0
+BACKGROUND='black'
 DELAY=10 # seconds
 # The usual time jump for the arrow keys, e.g. for 'vlc', is 10 seconds.
 FPS=25 # frames per seconds
@@ -60,9 +65,10 @@ find . -maxdepth 2 -name "*" | sort | while read f ; do # Works with spaces in n
     text=$(echo -e "${cap_text}\n\n${date_text}" | \
       sed -z 's/^\s*//' | sed -z 's/\s*$//') # Removing leading/trailing white spaces.
     if [ -n "${text}" ]; then
-      convert -fill white -background black \
-        -pointsize 20 -size 480x -gravity center caption:"${text}" \
-          -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${desc_file}"
+      convert -fill white -background "${BACKGROUND}" -pointsize "${POINTSIZE}" \
+        -size "${TEXTWIDTH}"x -gravity center caption:"${text}" \
+        -bordercolor "${BACKGROUND}" -border "${H_BORDER}"x"${V_BORDER}" \
+        -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${desc_file}"
     fi
     convert "${f}" -background black -gravity center \
       -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${img_file}"    
