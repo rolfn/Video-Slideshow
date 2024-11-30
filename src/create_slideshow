@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Rolf Niepraschk, Version 2.2.0 2024-11-10
+# Rolf Niepraschk, Version 2.3.0 2024-11-30
 
 CAPTION='[IPTC:2:120]' # Caption/Abstract
 DATETIME='[EXIF:DateTimeOriginal]' 
@@ -18,8 +18,9 @@ FPS=25 # frames per seconds
 
 show_cap=false
 show_date=false
+max_nb_of_subdirs=0
 
-while getopts ":cdh" opt; do
+while getopts ":cdr:h" opt; do
   case ${opt} in
     c)
       show_cap=true
@@ -27,12 +28,16 @@ while getopts ":cdh" opt; do
     d)
       show_date=true
       ;;
+    r)
+      max_nb_of_subdirs=${OPTARG}
+      ;;
     h)
       echo
       echo "Syntax: create_slideshow [-|c|d|h]"
       echo "options:"
       echo "c     shows caption"
       echo "d     shows date+time"
+      echo "r #n  maximum number of subdirectories (default: 0)"
       echo "h     this help"
       echo
       exit 1
@@ -47,7 +52,8 @@ done
 rm -f temp-????-?.png
 
 n=0
-find . -maxdepth 2 -name "*" | sort | while read f ; do # Works with spaces in names.
+# Works with spaces in names.
+find . -maxdepth ${max_nb_of_subdirs} -name "*" | sort | while read f ; do 
   if file "$f" | grep -qE 'image|bitmap'; then # Only image files.
     n=$(( ${n}+1 ))
     echo "${n}.: ${f}"
