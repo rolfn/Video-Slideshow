@@ -2,7 +2,7 @@
 
 # Rolf Niepraschk, Rolf.Niepraschk@gmx.de
 
-VERSION='2.3.0 2024-11-30'
+VERSION='2.3.1 2024-11-30'
 CAPTION='[IPTC:2:120]' # Caption/Abstract
 DATETIME='[EXIF:DateTimeOriginal]'
 
@@ -40,11 +40,11 @@ while getopts ":cdr:Vh" opt; do
       ;;
     h)
       echo
-      echo "Syntax: create_slideshow [-|c|d|V|h]"
+      echo "Syntax: create_slideshow [-|c|d|r|V|h]"
       echo "options:"
       echo "c     shows caption"
       echo "d     shows date+time"
-      echo "r #n  maximum number of subdirectories (default: 0)"
+      echo "r #   maximum number of subdirectories (default: 0)"
       echo "V     output version information and exit"
       echo "h     this help"
       echo
