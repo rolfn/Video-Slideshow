@@ -1,9 +1,12 @@
 #!/bin/bash
 
-# Rolf Niepraschk, Version 2.3.0 2024-11-30
+# Rolf Niepraschk, Rolf.Niepraschk@gmx.de
 
+VERSION='2.3.0 2024-11-30'
 CAPTION='[IPTC:2:120]' # Caption/Abstract
-DATETIME='[EXIF:DateTimeOriginal]' 
+DATETIME='[EXIF:DateTimeOriginal]'
+
+script="$(basename ${BASH_SOURCE:-$0})"
 
 VIDEO_FILE='slideshow.mp4'
 RESOLUTION='1920x1080'
@@ -20,7 +23,7 @@ show_cap=false
 show_date=false
 max_nb_of_subdirs=0
 
-while getopts ":cdr:h" opt; do
+while getopts ":cdr:Vh" opt; do
   case ${opt} in
     c)
       show_cap=true
@@ -31,13 +34,18 @@ while getopts ":cdr:h" opt; do
     r)
       max_nb_of_subdirs=${OPTARG}
       ;;
+    V)
+      echo "${script}, version ${VERSION}"
+      exit 1
+      ;;
     h)
       echo
-      echo "Syntax: create_slideshow [-|c|d|h]"
+      echo "Syntax: create_slideshow [-|c|d|V|h]"
       echo "options:"
       echo "c     shows caption"
       echo "d     shows date+time"
       echo "r #n  maximum number of subdirectories (default: 0)"
+      echo "V     output version information and exit"
       echo "h     this help"
       echo
       exit 1
