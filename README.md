@@ -31,6 +31,8 @@ in a directory that contains the desired image files. A video file is then creat
 ```
 -c     shows caption
 -d     shows date+time
+-r #   maximum number of subdirectories (default: #=0)
+-V     output version information and exit
 -h     help
 ```
 
