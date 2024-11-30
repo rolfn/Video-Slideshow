@@ -15,6 +15,7 @@ TEXTWIDTH=480
 H_BORDER=10
 V_BORDER=0
 BACKGROUND='black'
+FOREGROUND='white'
 DELAY=10 # seconds
 # The usual time jump for the arrow keys, e.g. for 'vlc', is 10 seconds.
 FPS=25 # frames per seconds
@@ -44,7 +45,7 @@ while getopts ":cdr:Vh" opt; do
       echo "options:"
       echo "c     shows caption"
       echo "d     shows date+time"
-      echo "r #   maximum number of subdirectories (default: 0)"
+      echo "r #   maximum number of subdirectories (default: #=0)"
       echo "V     output version information and exit"
       echo "h     this help"
       echo
@@ -79,12 +80,12 @@ find . -maxdepth ${max_nb_of_subdirs} -name "*" | sort | while read f ; do
     text=$(echo -e "${cap_text}\n\n${date_text}" | \
       sed -z 's/^\s*//' | sed -z 's/\s*$//') # Removing leading/trailing white spaces.
     if [ -n "${text}" ]; then
-      convert -fill white -background "${BACKGROUND}" -pointsize "${POINTSIZE}" \
+      convert -fill "${FOREGROUND}" -background "${BACKGROUND}" -pointsize "${POINTSIZE}" \
         -size "${TEXTWIDTH}"x -gravity center caption:"${text}" \
         -bordercolor "${BACKGROUND}" -border "${H_BORDER}"x"${V_BORDER}" \
         -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${desc_file}"
     fi
-    convert "${f}" -background black -gravity center \
+    convert "${f}" -background "${BACKGROUND}" -gravity center \
       -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${img_file}"    
   fi
 done
