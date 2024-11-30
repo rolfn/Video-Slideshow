@@ -13,7 +13,7 @@ The shell script to use requires the programs “[ImageMagick](https://imagemagi
 * Make sure the file `create_slideshow` is executable:
 
   ```
-  chmod u+x create_slideshow
+  chmod +x create_slideshow
   ```
   
 * Move `create_slideshow` to a location included in the `PATH` environment variable (e.g. `$HOME/bin`, `/usr/local/bin`, ...)
