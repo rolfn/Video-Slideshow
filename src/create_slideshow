@@ -22,7 +22,7 @@ FPS=25 # frames per seconds
 
 show_cap=false
 show_date=false
-max_nb_of_subdirs=0
+max_nb_of_subdirs=1
 
 while getopts ":cdr:Vh" opt; do
   case ${opt} in
@@ -85,7 +85,7 @@ find . -maxdepth ${max_nb_of_subdirs} -name "*" | sort | while read f ; do
         -bordercolor "${BACKGROUND}" -border "${H_BORDER}"x"${V_BORDER}" \
         -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${desc_file}"
     fi
-    convert "${f}" -background "${BACKGROUND}" -gravity center \
+    convert "${f}" -background black -gravity center \
       -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${img_file}"    
   fi
 done
