@@ -2,7 +2,7 @@
 
 # Rolf Niepraschk, Rolf.Niepraschk@gmx.de
 
-VERSION='2.3.2 2024-12-07'
+VERSION='2.3.2 2024-12-08'
 CAPTION='[IPTC:2:120]' # Caption/Abstract
 DATETIME='[EXIF:DateTimeOriginal]'
 
@@ -22,7 +22,7 @@ FPS=25 # frames per seconds
 
 show_cap=false
 show_date=false
-max_nb_of_subdirs=1
+max_dirs=1
 
 while getopts ":cdr:Vh" opt; do
   case ${opt} in
@@ -33,7 +33,7 @@ while getopts ":cdr:Vh" opt; do
       show_date=true
       ;;
     r)
-      max_nb_of_subdirs=${OPTARG}
+      max_dirs=${OPTARG}
       ;;
     V)
       echo "${script}, version ${VERSION}"
@@ -45,7 +45,7 @@ while getopts ":cdr:Vh" opt; do
       echo "options:"
       echo "c     shows caption"
       echo "d     shows date+time"
-      echo "r #   maximum number of subdirectories (default: #=0)"
+      echo "r #   maximum number of directories (default: #=1)"
       echo "V     output version information and exit"
       echo "h     this help"
       echo
@@ -62,7 +62,7 @@ rm -f temp-????-?.png
 
 n=0
 # Works with spaces in names.
-find . -maxdepth ${max_nb_of_subdirs} -name "*" | sort | while read f ; do 
+find . -maxdepth ${max_dirs} -name "*" | sort | while read f ; do 
   if file "$f" | grep -qE 'image|bitmap'; then # Only image files.
     n=$(( ${n}+1 ))
     echo "${n}.: ${f}"
