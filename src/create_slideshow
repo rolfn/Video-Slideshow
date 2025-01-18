@@ -2,7 +2,7 @@
 
 # Rolf Niepraschk, Rolf.Niepraschk@gmx.de
 
-VERSION='2.3.2 2024-12-08'
+VERSION='2.3.3 2025-01-18'
 CAPTION='[IPTC:2:120]' # Caption/Abstract
 DATETIME='[EXIF:DateTimeOriginal]'
 
