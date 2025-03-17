@@ -124,7 +124,7 @@ if [ -n "${title_text}" ]; then
     -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${TITLE_FILE}"
 fi
 
-if [ -f 'temp-0001-1.png' ]; then
+if [ -f 'temp-0001-2.png' ]; then
   echo -e "\nCreate: ${VIDEO_FILE}"
   cat ${TITLE_FILE} temp-????-?.png | \
     ffmpeg -y -loglevel error \
