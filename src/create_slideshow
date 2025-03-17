@@ -2,11 +2,17 @@
 
 # Rolf Niepraschk, Rolf.Niepraschk@gmx.de
 
-VERSION='2.3.3 2025-01-18'
+VERSION='2.4.0 2025-03-17'
 CAPTION='[IPTC:2:120]' # Caption/Abstract
 DATETIME='[EXIF:DateTimeOriginal]'
 
 script="$(basename ${BASH_SOURCE:-$0})"
+
+if ! [ -x "$(command -v magick)" ]; then
+  CONVERT_CMD="convert"
+else
+  CONVERT_CMD="magick"
+fi
 
 VIDEO_FILE='slideshow.mp4'
 RESOLUTION='1920x1080'
@@ -16,6 +22,12 @@ H_BORDER=10
 V_BORDER=0
 BACKGROUND='black'
 FOREGROUND='white'
+TITLE_FOREGROUND='#ffd700'    # Gold:       1,.844,0 --> 255,215,0 --> #ffd700
+SUBTITLE_FOREGROUND='#00bfff' # DeepSkyBlue: 0,.75,1 --> 0,191,255 --> #00bfff
+TITLE_POINTSIZE=28
+SUBTITLE_POINTSIZE=24
+TITLE_SOURCE='title.txt'
+TITLE_FILE='title.png'
 DELAY=10 # seconds
 # The usual time jump for the arrow keys, e.g. for 'vlc', is 10 seconds.
 FPS=25 # frames per seconds
@@ -58,7 +70,7 @@ while getopts ":cdr:Vh" opt; do
   esac
 done
 
-rm -f temp-????-?.png
+rm -f ${TITLE_FILE} temp-????-?.png 
 
 n=0
 # Works with spaces in names.
@@ -66,8 +78,9 @@ find . -maxdepth ${max_dirs} -name "*" | sort | while read f ; do
   if file "$f" | grep -qE 'image|bitmap'; then # Only image files.
     n=$(( ${n}+1 ))
     echo "${n}.: ${f}"
-    desc_file=$(printf "temp-%04d-0.png" ${n})
-    img_file=$(printf  "temp-%04d-1.png" ${n})
+    subtitle_file=$(printf "temp-%04d-0.png" ${n})
+    desc_file=$(printf "temp-%04d-1.png" ${n})
+    img_file=$(printf  "temp-%04d-2.png" ${n})
     cap_text=''
     if [ "${show_cap}" = true ] ; then
       cap_text=$(identify -format "%${CAPTION}" "${f}" 2> /dev/null)
@@ -80,19 +93,29 @@ find . -maxdepth ${max_dirs} -name "*" | sort | while read f ; do
     text=$(echo -e "${cap_text}\n\n${date_text}" | \
       sed -z 's/^\s*//' | sed -z 's/\s*$//') # Removing leading/trailing white spaces.
     if [ -n "${text}" ]; then
-      convert -fill "${FOREGROUND}" -background "${BACKGROUND}" -pointsize "${POINTSIZE}" \
+      ${CONVERT_CMD} -fill "${FOREGROUND}" -background "${BACKGROUND}" -pointsize "${POINTSIZE}" \
         -size "${TEXTWIDTH}"x -gravity center caption:"${text}" \
         -bordercolor "${BACKGROUND}" -border "${H_BORDER}"x"${V_BORDER}" \
         -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${desc_file}"
     fi
-    convert "${f}" -background black -gravity center \
+    ${CONVERT_CMD} "${f}" -background black -gravity center \
       -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${img_file}"    
   fi
 done
 
+if [ -f "${TITLE_SOURCE}" ]; then
+  title_text=$(cat ${TITLE_SOURCE})
+fi
+if [ -n "${title_text}" ]; then
+  ${CONVERT_CMD} -fill "${TITLE_FOREGROUND}" -background "${BACKGROUND}" -pointsize "${TITLE_POINTSIZE}" \
+    -size "${TEXTWIDTH}"x -gravity center caption:"${title_text}" \
+    -bordercolor "${BACKGROUND}" -border "${H_BORDER}"x"${V_BORDER}" \
+    -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${TITLE_FILE}"
+fi
+
 if [ -f 'temp-0001-1.png' ]; then
   echo -e "\nCreate: ${VIDEO_FILE}"
-  cat temp-????-?.png | \
+  cat ${TITLE_FILE} temp-????-?.png | \
     ffmpeg -y -loglevel error \
       -f lavfi -i anullsrc -framerate "1/${DELAY}" -f image2pipe -i - \
         -r ${FPS} -c:v libx264 -profile:v baseline -pix_fmt yuv420p -c:a aac \
@@ -101,7 +124,7 @@ if [ -f 'temp-0001-1.png' ]; then
   # display on older TVs.
 fi
 
-rm -f temp-????-?.png
+rm -f ${TITLE_FILE} temp-????-?.png 
 
 echo "done."
 
