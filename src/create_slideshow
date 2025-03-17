@@ -98,6 +98,17 @@ find . -maxdepth ${max_dirs} -name "*" | sort | while read f ; do
         -bordercolor "${BACKGROUND}" -border "${H_BORDER}"x"${V_BORDER}" \
         -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${desc_file}"
     fi
+    subtitle_source="$(basename "${f}" ".${f##*.}")-000subtitle.txt"
+    subtitle_text=''
+    if [ -f "${subtitle_source}" ]; then
+      subtitle_text=$(cat ${subtitle_source})
+    fi
+    if [ -n "${subtitle_text}" ]; then
+      ${CONVERT_CMD} -fill "${SUBTITLE_FOREGROUND}" -background "${BACKGROUND}" -pointsize "${SUBTITLE_POINTSIZE}" \
+        -size "${TEXTWIDTH}"x -gravity center caption:"${subtitle_text}" \
+        -bordercolor "${BACKGROUND}" -border "${H_BORDER}"x"${V_BORDER}" \
+        -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${subtitle_file}"
+    fi
     ${CONVERT_CMD} "${f}" -background black -gravity center \
       -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${img_file}"    
   fi

@@ -36,6 +36,10 @@ in a directory that contains the desired image files. A video file is then creat
 -h     help
 ```
 
+If the text file `title.txt` exists in the top-level directory, the text it contains will be inserted as title page.
+
+If a text file named `xxx-000subtitle.txt` exists for an image file `xxx.jpg` (or `xxx.png`, etc.), the text it contains will be inserted as a subtitle page before the image-specific text and the image.
+
 ## Modifications
 
 By changing the constants `VIDEO_FILE`, `RESOLUTION` and `DELAY` inside the script, the result can be adapted to your own requirements.
