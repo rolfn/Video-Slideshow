@@ -2,16 +2,16 @@
 
 # Rolf Niepraschk, Rolf.Niepraschk@gmx.de
 
-VERSION='2.4.0 2025-03-17'
+VERSION='2.4.1 2025-03-17'
 CAPTION='[IPTC:2:120]' # Caption/Abstract
 DATETIME='[EXIF:DateTimeOriginal]'
 
 script="$(basename ${BASH_SOURCE:-$0})"
 
-if ! [ -x "$(command -v magick)" ]; then
-  CONVERT_CMD="convert"
-else
+if [ -x "$(command -v magick)" ]; then
   CONVERT_CMD="magick"
+else
+  CONVERT_CMD="convert"
 fi
 
 VIDEO_FILE='slideshow.mp4'
