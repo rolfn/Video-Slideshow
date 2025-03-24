@@ -101,7 +101,7 @@ find . -maxdepth ${max_dirs} -name "*" | sort | while read f ; do
     subtitle_source="$(basename "${f}" ".${f##*.}")-subtitle.txt"
     subtitle_text=''
     if [ -f "${subtitle_source}" ]; then
-      subtitle_text=$(cat ${subtitle_source})
+      subtitle_text=$(cat "${subtitle_source}")
     fi
     if [ -n "${subtitle_text}" ]; then
       ${CONVERT_CMD} -fill "${SUBTITLE_FOREGROUND}" -background "${BACKGROUND}" -pointsize "${SUBTITLE_POINTSIZE}" \
