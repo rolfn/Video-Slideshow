@@ -75,7 +75,7 @@ rm -f ${TITLE_FILE} temp-????-?.png
 n=0
 # Works with spaces in names.
 find . -maxdepth ${max_dirs} -name "*" | sort | while read f ; do 
-  if file "$f" | grep -qE 'image|bitmap'; then # Only image files.
+  if file -L "$f" | grep -qE 'image|bitmap'; then # Only image files.
     n=$(( ${n}+1 ))
     echo "${n}.: ${f}"
     subtitle_file=$(printf "temp-%04d-0.png" ${n})
@@ -124,7 +124,7 @@ if [ -n "${title_text}" ]; then
     -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${TITLE_FILE}"
 fi
 
-if [ -f 'temp-0001-2.png' ]; then
+if [ -f 'temp-0001-2.png' ]; then # At least the first image file must exist.
   echo -e "\nCreate: ${VIDEO_FILE}"
   cat ${TITLE_FILE} temp-????-?.png | \
     ffmpeg -y -loglevel error \
