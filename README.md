@@ -38,7 +38,7 @@ in a directory that contains the desired image files. A video file is then creat
 
 If the text file `title.txt` exists in the top-level directory, the text it contains will be inserted as title page.
 
-If a text file named `xxx-subtitle.txt` exists for an image file `xxx.jpg` (or `xxx.png`, etc.), the text it contains will be inserted as a subtitle page before the image-specific text and the image itself.
+If a text file named `xxx-intertitle.txt` exists for an image file `xxx.jpg` (or `xxx.png`, etc.), the text it contains will be inserted as a intertitle page before the image-specific text and the image itself.
 
 ## Modifications
 

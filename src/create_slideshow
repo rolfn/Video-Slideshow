@@ -78,7 +78,7 @@ find . -maxdepth ${max_dirs} -name "*" | sort | while read f ; do
   if file -L "$f" | grep -qE 'image|bitmap'; then # Only image files.
     n=$(( ${n}+1 ))
     echo "${n}.: ${f}"
-    subtitle_file=$(printf "temp-%04d-0.png" ${n})
+    intertitle_file=$(printf "temp-%04d-0.png" ${n})
     desc_file=$(printf "temp-%04d-1.png" ${n})
     img_file=$(printf  "temp-%04d-2.png" ${n})
     cap_text=''
@@ -98,16 +98,16 @@ find . -maxdepth ${max_dirs} -name "*" | sort | while read f ; do
         -bordercolor "${BACKGROUND}" -border "${H_BORDER}"x"${V_BORDER}" \
         -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${desc_file}"
     fi
-    subtitle_source="$(basename "${f}" ".${f##*.}")-subtitle.txt"
-    subtitle_text=''
-    if [ -f "${subtitle_source}" ]; then
-      subtitle_text=$(cat "${subtitle_source}")
+    intertitle_source="$(basename "${f}" ".${f##*.}")-intertitle.txt"
+    intertitle_text=''
+    if [ -f "${intertitle_source}" ]; then
+      intertitle_text=$(cat "${intertitle_source}")
     fi
-    if [ -n "${subtitle_text}" ]; then
+    if [ -n "${intertitle_text}" ]; then
       ${CONVERT_CMD} -fill "${SUBTITLE_FOREGROUND}" -background "${BACKGROUND}" -pointsize "${SUBTITLE_POINTSIZE}" \
-        -size "${TEXTWIDTH}"x -gravity center caption:"${subtitle_text}" \
+        -size "${TEXTWIDTH}"x -gravity center caption:"${intertitle_text}" \
         -bordercolor "${BACKGROUND}" -border "${H_BORDER}"x"${V_BORDER}" \
-        -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${subtitle_file}"
+        -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${intertitle_file}"
     fi
     ${CONVERT_CMD} "${f}" -background black -gravity center \
       -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${img_file}"    
