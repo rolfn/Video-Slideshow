@@ -2,7 +2,7 @@
 
 # Rolf Niepraschk, Rolf.Niepraschk@gmx.de
 
-VERSION='2.4.3 2025-03-25'
+VERSION='2.4.4 2025-04-03'
 CAPTION='[IPTC:2:120]' # Caption/Abstract
 DATETIME='[EXIF:DateTimeOriginal]'
 
@@ -98,7 +98,7 @@ find . -maxdepth ${max_dirs} -name "*" | sort | while read f ; do
         -bordercolor "${BACKGROUND}" -border "${H_BORDER}"x"${V_BORDER}" \
         -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${desc_file}"
     fi
-    intertitle_source="$(basename "${f}" ".${f##*.}")-intertitle.txt"
+    intertitle_source="${f%.*}-intertitle.txt"
     intertitle_text=''
     if [ -f "${intertitle_source}" ]; then
       intertitle_text=$(cat "${intertitle_source}")
