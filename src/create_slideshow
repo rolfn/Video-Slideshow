@@ -2,16 +2,20 @@
 
 # Rolf Niepraschk, Rolf.Niepraschk@gmx.de
 
-VERSION='2.4.4 2025-04-03'
-CAPTION='[IPTC:2:120]' # Caption/Abstract
+VERSION='2.5.1 2026-09-26'
+# ImageMagick format strings for metadata
+XMP_CAPTION='[XMP:Description]'
+IPTC_CAPTION='[IPTC:2:120]' # Fallback Caption/Abstract
 DATETIME='[EXIF:DateTimeOriginal]'
 
-script="$(basename ${BASH_SOURCE:-$0})"
+script="$(basename "${BASH_SOURCE[-1]:-$0}")"
 
 if [ -x "$(command -v magick)" ]; then
   CONVERT_CMD="magick"
+  IDENTIFY_CMD="magick identify"
 else
   CONVERT_CMD="convert"
+  IDENTIFY_CMD="identify"
 fi
 
 VIDEO_FILE='slideshow.mp4'
@@ -49,22 +53,22 @@ while getopts ":cdr:Vh" opt; do
       ;;
     V)
       echo "${script}, version ${VERSION}"
-      exit 1
+      exit 0
       ;;
     h)
       echo
-      echo "Syntax: create_slideshow [|-c|-d|-r|-V|-h]"
+      echo "Syntax: ${script} [|-c|-d|-r|-V|-h]"
       echo "options:"
-      echo "c     shows caption"
+      echo "c     shows caption (Prefers XMP, falls back to IPTC)"
       echo "d     shows date+time"
       echo "r #   Maximum number of directory levels (default: #=1)"
       echo "V     output version information and exit"
       echo "h     this help"
       echo
-      exit 1
+      exit 0
       ;;
     ?)
-      echo "Invalid option: -${OPTARG}."
+      echo "Invalid option: -${OPTARG}." >&2
       exit 1
       ;;
   esac
@@ -72,71 +76,93 @@ done
 
 rm -f "${TITLE_FILE}" temp-????-?.png 
 
+# Read the main title first and output it to the terminal
+title_text=''
+if [ -f "${TITLE_SOURCE}" ]; then
+  title_text=$(cat "${TITLE_SOURCE}")
+  if [ -n "${title_text}" ]; then
+    echo "========================================"
+    echo "Main title: ${title_text}"
+    echo "========================================"
+    
+    ${CONVERT_CMD} -fill "${TITLE_FOREGROUND}" -background "${BACKGROUND}" -pointsize "${TITLE_POINTSIZE}" \
+      -size "${TEXTWIDTH}"x -gravity center caption:"${title_text}" \
+      -bordercolor "${BACKGROUND}" -border "${H_BORDER}"x"${V_BORDER}" \
+      -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${TITLE_FILE}"
+  fi
+fi
+
 n=0
-# Works with spaces in names.
-find . -maxdepth ${max_dirs} -name "*" | sort | while read f ; do 
-  if file -L "$f" | grep -qE 'image|bitmap'; then # Only image files.
-    n=$(( ${n}+1 ))
-    echo "${n}.: ${f}"
+
+# Loop now explicitly filters out temporary files and title.png
+while IFS= read -r -d '' f; do 
+  if file -bL --mime-type "$f" | grep -q '^image/'; then # Robust Image Inspection
+    n=$(( n + 1 ))
+    echo -e "\n[Image ${n}] Processing: ${f}"
+    
     intertitle_file=$(printf "temp-%04d-0.png" ${n})
     desc_file=$(printf "temp-%04d-1.png" ${n})
     img_file=$(printf  "temp-%04d-2.png" ${n})
-    cap_text=''
-    if [ "${show_cap}" = true ] ; then
-      cap_text=$(identify -format "%${CAPTION}" "${f}" 2> /dev/null)
-    fi
-    date_text=''
-    if [ "${show_date}" = true ] ; then
-      date_text=$(identify -format "%${DATETIME}" "${f}" 2> /dev/null \
-        | rev | sed 's/:/-/g3' | rev) # Replacing the first two ":" with "-".
-    fi    
-    text=$(echo -e "${cap_text}\n\n${date_text}" | \
-      sed -z 's/^\s*//' | sed -z 's/\s*$//') # Removing leading/trailing white spaces.
-    if [ -n "${text}" ]; then
-      ${CONVERT_CMD} -fill "${FOREGROUND}" -background "${BACKGROUND}" -pointsize "${POINTSIZE}" \
-        -size "${TEXTWIDTH}"x -gravity center caption:"${text}" \
-        -bordercolor "${BACKGROUND}" -border "${H_BORDER}"x"${V_BORDER}" \
-        -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${desc_file}"
-    fi
+    
+    # 1. Check intertitle and output them to the terminal
     intertitle_source="${f%.*}-intertitle.txt"
     intertitle_text=''
     if [ -f "${intertitle_source}" ]; then
       intertitle_text=$(cat "${intertitle_source}")
     fi
     if [ -n "${intertitle_text}" ]; then
+      echo "   -> Inter title: ${intertitle_text}"
       ${CONVERT_CMD} -fill "${SUBTITLE_FOREGROUND}" -background "${BACKGROUND}" -pointsize "${SUBTITLE_POINTSIZE}" \
         -size "${TEXTWIDTH}"x -gravity center caption:"${intertitle_text}" \
         -bordercolor "${BACKGROUND}" -border "${H_BORDER}"x"${V_BORDER}" \
         -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${intertitle_file}"
     fi
+
+    # 2. Image description: Prefer XMP, fallback to IPTC
+    cap_text=''
+    if [ "${show_cap}" = true ] ; then
+      cap_text=$(${IDENTIFY_CMD} -format "%${XMP_CAPTION}" "${f}" 2> /dev/null)
+      if [ -z "${cap_text}" ]; then
+        cap_text=$(${IDENTIFY_CMD} -format "%${IPTC_CAPTION}" "${f}" 2> /dev/null)
+      fi
+      if [ -n "${cap_text}" ]; then
+        echo "   -> Caption:  ${cap_text}"
+      fi
+    fi
+    
+    # 3. Read in date 
+    date_text=''
+    if [ "${show_date}" = true ] ; then
+      date_text=$(${IDENTIFY_CMD} -format "%${DATETIME}" "${f}" 2> /dev/null | rev | sed 's/:/-/g3' | rev)
+      if [ -n "${date_text}" ]; then
+        echo "   -> Datum/Zeit:    ${date_text}"
+      fi
+    fi    
+    
+    text=$(echo -e "${cap_text}\n\n${date_text}" | sed -z 's/^\s*//;s/\s*$//')
+    if [ -n "${text}" ]; then
+      ${CONVERT_CMD} -fill "${FOREGROUND}" -background "${BACKGROUND}" -pointsize "${POINTSIZE}" \
+        -size "${TEXTWIDTH}"x -gravity center caption:"${text}" \
+        -bordercolor "${BACKGROUND}" -border "${H_BORDER}"x"${V_BORDER}" \
+        -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${desc_file}"
+    fi
+
     ${CONVERT_CMD} "${f}" -background black -gravity center \
       -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${img_file}"    
   fi
-done
+done < <(find . -maxdepth "${max_dirs}" -type f ! -name "temp-*" ! -name "${TITLE_FILE}" -print0 | sort -z)
 
-if [ -f "${TITLE_SOURCE}" ]; then
-  title_text=$(cat "${TITLE_SOURCE}")
-fi
-if [ -n "${title_text}" ]; then
-  ${CONVERT_CMD} -fill "${TITLE_FOREGROUND}" -background "${BACKGROUND}" -pointsize "${TITLE_POINTSIZE}" \
-    -size "${TEXTWIDTH}"x -gravity center caption:"${title_text}" \
-    -bordercolor "${BACKGROUND}" -border "${H_BORDER}"x"${V_BORDER}" \
-    -resize "${RESOLUTION}" -extent "${RESOLUTION}" "PNG24:${TITLE_FILE}"
-fi
-
-if [ -f 'temp-0001-2.png' ]; then # At least the first image file must exist.
-  echo -e "\nCreate: ${VIDEO_FILE}"
+if [ -f 'temp-0001-2.png' ]; then
+  echo -e "\nCreate video: ${VIDEO_FILE} ..."
   cat "${TITLE_FILE}" temp-????-?.png 2>/dev/null | \
     ffmpeg -y -loglevel error \
       -f lavfi -i anullsrc -framerate "1/${DELAY}" -f image2pipe -i - \
         -r ${FPS} -c:v libx264 -profile:v baseline -pix_fmt yuv420p -c:a aac \
           -max_muxing_queue_size 4000 -shortest "${VIDEO_FILE}"
-  # The video should have an audio dummy channel and an old h264 profile to
-  # display on older TVs.
 fi
 
 rm -f "${TITLE_FILE}" temp-????-?.png
 
-echo "done."
+echo -e "\nDone."
 
-exit
+exit 0
