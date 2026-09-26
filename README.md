@@ -39,7 +39,7 @@ During execution, the script outputs the processed titles, intertitles, and capt
 
 
 ```
--c shows caption (prefers XMP, falls back to IPTC)
+-c     shows caption (prefers XMP, falls back to IPTC)
 -d     shows date+time
 -r #   maximum number of subdirectories (default: #=1)
 -V     output version information and exit
